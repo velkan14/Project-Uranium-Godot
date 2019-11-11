@@ -1,13 +1,13 @@
 extends Object
 
 # The name of the move
-var name = "Scratch"
+var name = "Water Gun"
 
 # The type of the move
-var type = Type.NORMAL
+var type = Type.WATER
 
-# The style of the move (Physical, Special, Self?)
-var style = MoveStyle.PHYSICAL
+# The style of the move (Physical, Special, Status)
+var style = MoveStyle.SPECIAL
 
 # The base power of the move
 var base_power = 40
@@ -25,10 +25,10 @@ var critical_hit_level = 1
 var secondary_effect_chance
 
 # The flags of the move
-var flags
+var flags = []
 
 # The total pp of the move
-var total_pp = 35
+var total_pp = 25
 
 # The target ability of the move (Single, Double, All_Foes, Self)
 var target_ability = MoveTarget.SINGLE_FOE

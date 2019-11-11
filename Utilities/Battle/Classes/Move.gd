@@ -7,7 +7,7 @@ var name
 # The type of the move
 var type
 
-# The style of the move (Physical, Special, Self?)
+# The style of the move (Physical, Special, Status)
 var style
 
 # The base power of the move
@@ -30,6 +30,9 @@ var flags
 
 # The total pp of the move
 var total_pp
+
+# The remaining pp of the move
+var remaining_pp
 
 # The target ability of the move (Single, Double, All, Self)
 var target_ability

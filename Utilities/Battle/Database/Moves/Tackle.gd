@@ -1,16 +1,16 @@
 extends Object
 
 # The name of the move
-var name = "Scratch"
+var name = "Tackle"
 
 # The type of the move
 var type = Type.NORMAL
 
-# The style of the move (Physical, Special, Self?)
+# The style of the move (Physical, Special, Status)
 var style = MoveStyle.PHYSICAL
 
 # The base power of the move
-var base_power = 40
+var base_power = 50
 
 # The accuracy of the move
 var accuracy = 100
@@ -25,7 +25,7 @@ var critical_hit_level = 1
 var secondary_effect_chance
 
 # The flags of the move
-var flags
+var flags = []
 
 # The total pp of the move
 var total_pp = 35
