@@ -4,6 +4,13 @@ var battle_instance : BattleInstanceData
 var queue : BattleQueue
 var registry
 
+var battler1 : Pokemon # Player's pokemon
+var battler2 : Pokemon # Foe's pokemon
+var battler3 : Pokemon # Player's second pokemon in double battles
+var battler4 : Pokemon # Foe's second pokemonin double battles
+
+
+
 signal wait
 signal EndOfBattleLoop
 
@@ -12,9 +19,11 @@ func _ready():
 	$CanvasLayer/TransitionEffects.visible = false
 	$CanvasLayer/BattleInterfaceLayer/BattleBars.visible = false
 	$CanvasLayer/BattleInterfaceLayer/Message.visible = false
+	$CanvasLayer/BattleInterfaceLayer/PlayerToss.visible = false
 	$CanvasLayer/BattleInterfaceLayer/BattleComandSelect.visible = false
+	$CanvasLayer/BattleGrounds/ColorRect.color = Color("000000")
+	$CanvasLayer/BattleGrounds/ColorRect.visible = true
 	registry = load("res://Utilities/Battle/Database/Pokemon/registry.gd").new()
-	
 	test()
 	pass
 
@@ -34,9 +43,14 @@ func Start_Battle(bid : BattleInstanceData):
 	# Initialize BattleQueue
 	queue = BattleQueue.new()
 	
+	# Set first wave pokemon
+	battler1 = Global.pokemon_group[0]
+	battler2 = battle_instance.opponent.pokemon_group[0]
+
 	# Set human opponent texture
 	if battle_instance.battle_type != battle_instance.BattleType.SINGLE_WILD:
 		$CanvasLayer/BattleGrounds/FoeBase/FoeHuman.texture = battle_instance.opponent.battle_texture
+		$CanvasLayer/BattleGrounds/FoeBase/FoeHuman/HumanShadow.texture = battle_instance.opponent.battle_texture
 	
 	# Add Foe introduction to queue
 	match battle_instance.battle_type:
@@ -65,13 +79,24 @@ func Start_Battle(bid : BattleInstanceData):
 			queue.push(action)
 			action = BattleQueueAction.new()
 			action.type = action.BATTLE_TEXT
-			action.battle_text = "RIVAL Theo sent\nout " + battle_instance.opponent.pokemon_group[0].name + "!"
+			action.battle_text = "RIVAL Theo sent\nout " + battler2.name + "!"
 			queue.push(action)
 	# If human opponent add ball toss.
+	if battle_instance.battle_type == battle_instance.BattleType.RIVAL or battle_instance.battle_type == battle_instance.BattleType.SINGLE_TRAINER:
+		var action = BattleQueueAction.new()
+		action.type = action.FOE_BALLTOSS
+		
+		
+		
+		queue.push(action)
+		pass
+	# Load data to Foe Bar
+	$CanvasLayer/BattleInterfaceLayer/BattleBars.set_foe_bar_by_pokemon(battler2)
 	
 	
-	
-	
+	# Load data to Foe Battler
+	$CanvasLayer/BattleGrounds/FoeBase.setup_by_pokemon(battler2)
+
 	
 	# Add Player toss to queue
 	var action = BattleQueueAction.new()
@@ -79,20 +104,53 @@ func Start_Battle(bid : BattleInstanceData):
 	action.battle_grounds_pos_change = $CanvasLayer/BattleGrounds.BattlePositions.PLAYER_TOSS
 	queue.push(action)
 	
+	# Load data to Player Bar
+	$CanvasLayer/BattleInterfaceLayer/BattleBars.set_player_bar_by_pokemon(battler1)
+	$CanvasLayer/BattleGrounds/PlayerBase.setup_by_pokemon(battler1)
+
+	# Go text
+	action = BattleQueueAction.new()
+	action.type = action.BATTLE_TEXT
+	action.battle_text = "Go " + battler1.name + "!"
+	queue.push(action)
+
+	# Player toss animations
+	action = BattleQueueAction.new()
+	action.type = action.PLAYER_BALLTOSS
+	queue.push(action)
+
+	# Change view to CENTER 
+	action = BattleQueueAction.new()
+	action.type = action.BATTLE_GROUNDS_POS_CHANGE
+	action.battle_grounds_pos_change = $CanvasLayer/BattleGrounds.BattlePositions.CENTER
+	queue.push(action)
 	# Start the battle loop until player wins or losses.
 	var isBattleOver = false
 	
 	while isBattleOver == false:
 		if queue.is_empty(): # If queue is empty, get player battle comand.
-			pass
+			# Pop up battle comand menu.
+			print("Getting comand from player")
+			get_battle_comand()
+			yield(self, "wait")
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 		else:
 			battle_loop()
 			yield(self, "EndOfBattleLoop")
 		
 		
 		# Check if battle is over.
-		if queue.is_empty(): # Temp should be replaced by proper battle check!
-			isBattleOver = true
+		#if queue.is_empty(): # Temp should be replaced by proper battle check!
+		#	isBattleOver = true
 	
 	# After battle comands
 	print("Battle is over.")
@@ -116,6 +174,10 @@ func test():
 	
 	bid.opponent.battle_texture = load("res://Graphics/Characters/trainer086.png")
 	
+
+	poke = Pokemon.new()
+	poke.set_basic_pokemon_by_level(1,5)
+	Global.pokemon_group.append(poke)
 	
 	Start_Battle(bid)
 
@@ -143,13 +205,13 @@ func set_gender_textures():
 	match Global.TrainerGender:
 		0:
 			$CanvasLayer/TransitionEffects/Vs/PlayerBanner.texture = load("res://Graphics/Transitions/vsTrainer0.png")
-			$CanvasLayer/BattleGrounds/PlayerToss.texture = load("res://Graphics/Characters/trback000.png")
+			$CanvasLayer/BattleInterfaceLayer/PlayerToss.texture = load("res://Graphics/Characters/trback000.png")
 		1:
 			$CanvasLayer/TransitionEffects/Vs/PlayerBanner.texture = load("res://Graphics/Transitions/vsTrainer9.png")
-			$CanvasLayer/BattleGrounds/PlayerToss.texture = load("res://Graphics/Characters/trback009.png")
+			$CanvasLayer/BattleInterfaceLayer/PlayerToss.texture = load("res://Graphics/Characters/trback009.png")
 		2:
 			$CanvasLayer/TransitionEffects/Vs/PlayerBanner.texture = load("res://Graphics/Transitions/vsTrainer1.png")
-			$CanvasLayer/BattleGrounds/PlayerToss.texture = load("res://Graphics/Characters/trback001.png")
+			$CanvasLayer/BattleInterfaceLayer/PlayerToss.texture = load("res://Graphics/Characters/trback001.png")
 	$CanvasLayer/TransitionEffects/Vs/PlayerBanner/Label.bbcode_text = "[center]" + Global.TrainerName
 func set_battle_music():
 	match battle_instance.battle_type:
@@ -216,5 +278,29 @@ func battle_loop():
 			yield(t, "timeout")
 			t.queue_free()
 			$CanvasLayer/BattleInterfaceLayer/Message.visible = false
-	#print("end of loop")
+		action.FOE_BALLTOSS:
+			# if human opponent is visable play fadeing animation
+			if $CanvasLayer/BattleGrounds/FoeBase/FoeHuman.visible == true:
+				$CanvasLayer/BattleGrounds/FoeBase/FoeHuman/AnimationPlayer.play("FadeOut")
+			
+			$CanvasLayer/BattleGrounds/FoeBase/Ball.visible = true
+			$CanvasLayer/BattleGrounds.foe_unveil()
+			$CanvasLayer/BattleGrounds/FoeBase/FoeHuman.visible = false
+			yield($CanvasLayer/BattleGrounds, "unveil_finished")
+		action.PLAYER_BALLTOSS:
+			$CanvasLayer/BattleGrounds.player_unveil()
+			yield($CanvasLayer/BattleGrounds, "unveil_finished")
 	emit_signal("EndOfBattleLoop")
+func get_battle_comand():
+	var menu = $CanvasLayer/BattleInterfaceLayer/BattleComandSelect
+	menu.get_node("AnimationPlayer").play("Slide")
+	menu.visible = true
+	menu.start(battler1.name)
+	
+	yield(menu.get_node("AnimationPlayer"), "animation_finished")
+	
+	
+	
+	
+	#emit_signal("wait")
+	pass
